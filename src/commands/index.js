@@ -1,4 +1,5 @@
 import { Message } from 'discord.js'
+import table from 'text-table'
 
 import config from '../config'
 
@@ -7,6 +8,10 @@ import { tenor } from '../services/api'
 /** @param {Message} message */
 export default async function (message) {
   const { content } = message
+
+  if (content === '.help') {
+    message.reply('.git termo de busca | .pum')
+  }
 
   if (content === '.pum') {
     message.channel.send(`${message.author} soltou um pum!`, {
