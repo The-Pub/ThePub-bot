@@ -5,11 +5,21 @@
   "repository": "git@github.com:Pelegrinetti/ThePub-bot.git",
   "author": "Pelegrinetti <pelegrinetti.dev@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "build": "babel src/ -d build/",
+    "dev": "nodemon src/bot.js",
+    "start": "node build/bot.js"
+  },
   "dependencies": {
     "discord.js": "^12.1.1",
     "dotenv": "^8.2.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/node": "^7.8.7",
+    "@babel/preset-env": "^7.9.0",
+    "babel-eslint": "^10.1.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-config-standard": "^14.1.1",
@@ -19,7 +29,6 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "nodemon": "^2.0.2",
-    "prettier": "^2.0.2",
-    "sucrase": "^3.13.0"
+    "prettier": "^2.0.2"
   }
 }
