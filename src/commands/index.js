@@ -45,4 +45,29 @@ export default async function (message) {
       console.log(error.message)
     }
   }
+
+  if (content.startsWith('.jokenpo')) {
+    const [_, user = '@ThePub-bot'] = content.split(' ')
+
+    const ppt = ['Pedra', 'Papel', 'Tesoura']
+    const choiceOne = ppt[Math.floor(Math.random() * ppt.length)]
+    const choiceTwo = ppt[Math.floor(Math.random() * ppt.length)]
+
+    let result
+
+    if (choiceOne === choiceTwo) {
+      result = choiceOne + ' x ' + choiceTwo + ': *Empate* :laughing:'
+    } else if (
+      (choiceOne === 'Pedra' && choiceTwo === 'Tesoura') ||
+      (choiceOne === 'Papel' && choiceTwo === 'Pedra') ||
+      (choiceOne === 'Tesoura' && choiceTwo === 'Papel')
+    ) {
+      result = choiceOne + ' x ' + choiceTwo + ': *Vitória* :wink:'
+    } else {
+      result =
+        choiceOne + ' x ' + choiceTwo + ': *Derrota* :face_with_raised_eyebrow:'
+    }
+
+    message.reply(`${message.author} desafiou ${user}! ${result}`)
+  }
 }
