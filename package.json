@@ -11,9 +11,14 @@
     "start": "node build/bot.js"
   },
   "dependencies": {
+    "@discordjs/opus": "^0.1.0",
     "axios": "^0.19.2",
     "discord.js": "^12.1.1",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "ffmpeg": "^0.0.4",
+    "prism-media": "^1.2.1",
+    "ytdl-core": "^2.0.1",
+    "ytsr": "^0.1.12"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",

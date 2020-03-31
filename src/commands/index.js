@@ -1,5 +1,6 @@
-import { Message } from 'discord.js'
-import table from 'text-table'
+import { Message, MessageEmbed } from 'discord.js'
+import ytdl from 'ytdl-core'
+import ytsr from 'ytsr'
 
 import config from '../config'
 
@@ -69,5 +70,58 @@ export default async function (message) {
     }
 
     message.reply(`${message.author} desafiou ${user}! ${result}`)
+  }
+
+  if (content.startsWith('.play')) {
+    if (message.member.voice.channel) {
+      const { channel } = message.member.voice
+      const command = content.split(' ')
+
+      if (command.length <= 1) {
+        message.channel.send('Informe a música')
+        return
+      }
+
+      const connection = await channel.join()
+
+      let dispatcher
+      const embed = new MessageEmbed()
+
+      embed.setColor('#8e44ad').setDescription('Tocando...')
+
+      if (ytdl.validateURL(command[1])) {
+        const info = await ytdl.getBasicInfo(command[1])
+        embed.setTitle(info.title)
+        embed.setURL(command[1])
+
+        dispatcher = connection.play(ytdl(command[1], { filter: 'audioonly' }))
+      } else {
+        ytsr(
+          command.filter((p) => p !== '.play').join(' '),
+          (err, response) => {
+            if (err) {
+              message.channel.send('Desculpe, mas ocorreu um erro!')
+            }
+
+            embed.setTitle(response.items[0].title)
+            embed.setURL(response.items[0].link)
+
+            message.channel.send(embed)
+
+            dispatcher = connection.play(
+              ytdl(response.items[0].link, { filter: 'audioonly' })
+            )
+          }
+        )
+      }
+
+      if (dispatcher) {
+        dispatcher.on('finish', () => {
+          message.channel.send('Acaboou!')
+        })
+      }
+    } else {
+      message.reply('Você tem que conectar a uma sala de voz primeiro!')
+    }
   }
 }
