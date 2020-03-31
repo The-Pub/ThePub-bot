@@ -9,7 +9,12 @@ const bot = new Client({
   messageSweepInterval: 60,
 })
 
-bot.on('ready', () => {
+bot.on('ready', async () => {
+  await bot.user.setActivity('.help', {
+    type: 'LISTENING',
+    name: 'The Pub',
+  })
+
   console.log(`Pronto! Como: ${bot.user.tag}!`)
 })
 
