@@ -19,6 +19,7 @@ module.exports = {
     sourceType: 'module'
   },
   rules: {
-    'prettier/prettier': 'error'
+    'prettier/prettier': 'error',
+    'no-unused-vars': 'off'
   }
 }
