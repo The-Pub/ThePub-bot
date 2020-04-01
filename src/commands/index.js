@@ -1,10 +1,17 @@
 import { Message, MessageEmbed } from 'discord.js'
+import { promisify } from 'util'
 import ytdl from 'ytdl-core'
 import ytsr from 'ytsr'
 
 import config from '../config'
 
 import { tenor } from '../services/api'
+
+import Queue from '../util/Queue'
+
+const queue = new Queue()
+let dispatcher
+let connection
 
 /** @param {Message} message */
 export default async function (message) {
@@ -73,7 +80,7 @@ export default async function (message) {
   }
 
   if (content.startsWith('.play')) {
-    if (message.member.voice.channel) {
+    if (message.member.voice.channel || !message.author.bot) {
       const { channel } = message.member.voice
       const command = content.split(' ')
 
@@ -82,46 +89,120 @@ export default async function (message) {
         return
       }
 
-      const connection = await channel.join()
+      if (!connection) {
+        console.log('Conectando ao canal ' + channel.id)
+        connection = await channel.join()
+      }
 
-      let dispatcher
-      const embed = new MessageEmbed()
-
-      embed.setColor('#8e44ad').setDescription('Tocando...')
-
-      if (ytdl.validateURL(command[1])) {
-        const info = await ytdl.getBasicInfo(command[1])
-        embed.setTitle(info.title)
-        embed.setURL(command[1])
-
-        dispatcher = connection.play(ytdl(command[1], { filter: 'audioonly' }))
-      } else {
-        ytsr(
-          command.filter((p) => p !== '.play').join(' '),
-          (err, response) => {
-            if (err) {
-              message.channel.send('Desculpe, mas ocorreu um erro!')
-            }
-
-            embed.setTitle(response.items[0].title)
-            embed.setURL(response.items[0].link)
-
-            message.channel.send(embed)
-
+      handleQueue(command).then(({ queue: resolved, embed }) => {
+        message.channel.send(embed)
+        queue._queue = resolved._queue
+        if (!(queue.getLength() >= 2)) {
+          dispatcher = connection.play(
+            ytdl(resolved.getFirst().url, { filter: 'audioonly' })
+          )
+        } else {
+          dispatcher.on('finish', () => {
+            queue.remove(0)
             dispatcher = connection.play(
-              ytdl(response.items[0].link, { filter: 'audioonly' })
+              ytdl(queue.getFirst().url, { filter: 'audioonly' })
             )
-          }
-        )
-      }
-
-      if (dispatcher) {
-        dispatcher.on('finish', () => {
-          message.channel.send('Acaboou!')
-        })
-      }
+          })
+        }
+      })
     } else {
       message.reply('Você tem que conectar a uma sala de voz primeiro!')
     }
   }
+
+  if (content.startsWith('.queue')) {
+    const embed = new MessageEmbed()
+
+    embed.setTitle('Queue!').setColor('#3d3d3d')
+
+    queue._queue.map((music, index) => {
+      embed.addField(
+        `${index}\t${music.title}` || 'Música sem título',
+        music.duration || 'Sem tempo'
+      )
+    })
+
+    message.channel.send(embed)
+  }
+
+  if (content.startsWith('.pause')) {
+    if (dispatcher) {
+      dispatcher.pause()
+    }
+  }
+
+  if (content.startsWith('.resume')) {
+    if (dispatcher) {
+      dispatcher.resume()
+    }
+  }
+
+  if (content.startsWith('.next')) {
+    if (dispatcher) {
+      dispatcher.end()
+    }
+  }
+
+  if (content.startsWith('.stop')) {
+    if (connection) {
+      queue._queue = []
+      message.channel.send(`Adios meu caro ${message.author.username}!`)
+      connection.disconnect()
+    }
+  }
+
+  if (content.startsWith('.remove')) {
+    const [_, index] = content.split(' ')
+
+    queue.remove(parseInt(index))
+
+    message.channel.send('Removido!')
+  }
+}
+
+const handleQueue = (param) => {
+  return new Promise((resolve, reject) => {
+    const embed = new MessageEmbed()
+    embed.setColor('#3d3d3d').setTitle('Adicionando a fila...')
+
+    try {
+      if (ytdl.validateURL(param[1])) {
+        ytdl.getBasicInfo(param[1]).then((info) => {
+          embed.setDescription(info.title).setURL(param[1])
+          queue.add({
+            title: info.title,
+            url: param[1],
+            duration: `\t${new Date(info.length_seconds / 1000)
+              .toISOString()
+              .slice(11, 1)}`,
+          })
+        })
+
+        resolve({ queue, embed })
+      } else {
+        const ytsrPromise = promisify(ytsr)
+        ytsrPromise(param.filter((p) => p !== '.play').join(' ')).then(
+          (response) => {
+            embed
+              .setDescription(response.items[0].title)
+              .setURL(response.items[0].link)
+
+            queue.add({
+              title: response.items[0].title,
+              url: response.items[0].link,
+              duration: `\t${response.items[0].duration}`,
+            })
+            resolve({ queue, embed })
+          }
+        )
+      }
+    } catch (error) {
+      reject(error)
+    }
+  })
 }
