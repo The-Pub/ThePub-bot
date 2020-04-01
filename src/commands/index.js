@@ -18,7 +18,35 @@ export default async function (message) {
   const { content } = message
 
   if (content === '.help') {
-    message.reply('.git termo de busca | .pum')
+    const embed = new MessageEmbed()
+
+    embed.setColor('#3d3d3d')
+    embed.setTitle('Ajuda')
+    embed.setDescription('Descrição dos comandos')
+    embed.addField('.pum', 'Fala em TTS que você soltou um pum!!!')
+    embed.addField(
+      '.jokenpo',
+      'Você pode desafiar o bot ou algum membro para umsa desputa! Ex: .jokenpo @The Pub'
+    )
+    embed.addField(
+      '.play',
+      'Toca uma música para aquele seu :heart:! Ex: .play música boa **ou** .play https://youtube.com/linkdasuamúsica'
+    )
+    embed.addField(
+      '.stop',
+      'Limpa a fila de músicas e desconecta o bot do canal'
+    )
+    embed.addField('.queue', 'Mostra as músicas na fila!')
+    embed.addField(
+      '.remove',
+      'Remove uma música pelo número identificador que fica na frente da música no comando `.queue`! Ex: .remove 2'
+    )
+    embed.addField('.next', 'Vai para a próxima música!')
+    embed.addField('.pause', 'Para a música atual!')
+    embed.addField('.resume', 'Continua a música parada pelo comando `.pause`!')
+    embed.setFooter('Isso é tudo, por enquanto...')
+
+    message.channel.send(embed)
   }
 
   if (content === '.pum') {
