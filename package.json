@@ -8,7 +8,7 @@
   "scripts": {
     "build": "babel src/ -d build/",
     "dev": "nodemon src/bot.js",
-    "start": "node build/bot.js"
+    "start": "pm2 start build/bot.js --watch"
   },
   "dependencies": {
     "@discordjs/opus": "^0.1.0",
