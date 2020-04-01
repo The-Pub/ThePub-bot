@@ -153,6 +153,7 @@ export default async function (message) {
       queue._queue = []
       message.channel.send(`Adios meu caro ${message.author.username}!`)
       connection.disconnect()
+      connection = null
     }
   }
 
