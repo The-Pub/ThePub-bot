@@ -27,6 +27,14 @@ export default class Queue {
     return this._queue
   }
 
+  setQueue(queue) {
+    this._queue = queue
+  }
+
+  getQueue() {
+    return this._queue
+  }
+
   remove(index) {
     this._queue = this._queue.filter(
       (_element, elementIndex) => elementIndex !== index

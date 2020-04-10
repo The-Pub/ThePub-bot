@@ -124,7 +124,7 @@ export default async function (message) {
 
       handleQueue(command).then(({ queue: resolved, embed }) => {
         message.channel.send(embed)
-        queue._queue = resolved._queue
+        queue.setQueue(resolved.getQueue())
         if (!(queue.getLength() >= 2)) {
           dispatcher = connection.play(
             ytdl(resolved.getFirst().url, { filter: 'audioonly' })
@@ -148,7 +148,7 @@ export default async function (message) {
 
     embed.setTitle('Queue!').setColor('#3d3d3d')
 
-    queue._queue.map((music, index) => {
+    queue.getQueue().map((music, index) => {
       embed.addField(
         `${index}\t${music.title}` || 'Música sem título',
         music.duration || 'Sem tempo'
@@ -178,7 +178,7 @@ export default async function (message) {
 
   if (content.startsWith('.stop')) {
     if (connection) {
-      queue._queue = []
+      queue.setQueue([])
       message.channel.send(`Adios meu caro ${message.author.username}!`)
       connection.disconnect()
       connection = null
