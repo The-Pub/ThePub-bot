@@ -126,14 +126,13 @@ export default async function (message) {
         message.channel.send(embed)
         queue.setQueue(resolved.getQueue())
         if (!(queue.getLength() >= 2)) {
-          dispatcher = connection.play(
-            ytdl(resolved.getFirst().url, { filter: 'audioonly' })
-          )
+          const music = resolved.goNext()
+          dispatcher = connection.play(ytdl(music.url, { filter: 'audioonly' }))
         } else {
           dispatcher.on('finish', () => {
-            queue.remove(0)
+            const music = queue.goNext()
             dispatcher = connection.play(
-              ytdl(queue.getFirst().url, { filter: 'audioonly' })
+              ytdl(music.url, { filter: 'audioonly' })
             )
           })
         }
@@ -150,7 +149,9 @@ export default async function (message) {
 
     queue.getQueue().map((music, index) => {
       embed.addField(
-        `${index}\t${music.title}` || 'Música sem título',
+        `${index}\t${queue.getPlaying() === index ? 'Tocando: ' : ''}${
+          music.title
+        }` || 'Música sem título',
         music.duration || 'Sem tempo'
       )
     })

@@ -1,42 +1,60 @@
 export default class Queue {
   constructor() {
-    this._queue = []
+    this._queue = {
+      playing: 0,
+      next: false,
+      elements: [],
+    }
   }
 
   add(element) {
-    this._queue.push(element)
+    this._queue.elements.push(element)
   }
 
   getFirst() {
-    return this._queue[0]
+    return this._queue.elements[0]
   }
 
   getLength() {
-    return this._queue.length
+    return this._queue.elements.length
   }
 
-  getNext() {
-    return this._queue[1]
+  goNext() {
+    let nextIndex = 0
+
+    if (this.getQueue().length > 1) {
+      nextIndex = this.getPlaying() + 1
+    }
+
+    console.log(this.getPlaying(), nextIndex, this.getLength())
+
+    this.setPlaying(nextIndex)
+
+    return this._queue.elements[nextIndex]
   }
 
   isFirst() {
-    return this._queue.length === 1
+    return this._queue.elements.length === 1
   }
 
-  index() {
-    return this._queue
+  setPlaying(index) {
+    this._queue.playing = index
+  }
+
+  getPlaying() {
+    return this._queue.playing
   }
 
   setQueue(queue) {
-    this._queue = queue
+    this._queue.elements = queue
   }
 
   getQueue() {
-    return this._queue
+    return this._queue.elements
   }
 
   remove(index) {
-    this._queue = this._queue.filter(
+    this._queue.elements = this._queue.elements.filter(
       (_element, elementIndex) => elementIndex !== index
     )
   }
