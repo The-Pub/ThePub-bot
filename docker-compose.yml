@@ -6,4 +6,4 @@ services:
     build: .
     volumes: 
       - '.:/usr/bot'
-    command: 'yarn start'
+    command: 'yarn dev'
